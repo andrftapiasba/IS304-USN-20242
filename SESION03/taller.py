@@ -89,3 +89,66 @@ class CuentaBancaria:
         print(f"Fecha de apertura: {self.__fecha_apertura.strftime('%d/%m/%Y')}")
         print(f"Último retiro: {self.__ultimo_retiro}")
         print(f"Última consignación: {self.__ultima_consignacion}")
+
+    def menu():
+    cuentas = {}
+    while True:
+        print("\n--- Menú de Cuenta Bancaria ---")
+        print("1. Apertura de Cuenta")
+        print("2. Consignar Dinero")
+        print("3. Retirar Dinero")
+        print("4. Transferir Dinero")
+        print("5. Mostrar Información de Cuenta")
+        print("6. Salir")
+        
+        opcion = input("Seleccione una opción (1-6): ")
+        
+        if opcion == '1':
+            numero_cta = input("Ingrese el número de cuenta: ")
+            nombre_cliente = input("Ingrese el nombre del cliente: ")
+            saldo_cta = float(input("Ingrese el saldo inicial: "))
+            fecha_apertura = datetime.strptime(input("Ingrese la fecha de apertura (dd/mm/yyyy): "), "%d/%m/%Y")
+            cuentas[numero_cta] = CuentaBancaria(numero_cta, nombre_cliente, saldo_cta, fecha_apertura)
+            print(f"Cuenta {numero_cta} abierta exitosamente.")
+        
+        elif opcion == '2':
+            numero_cta = input("Ingrese el número de cuenta: ")
+            if numero_cta in cuentas:
+                cantidad = float(input("Ingrese la cantidad a consignar: "))
+                cuentas[numero_cta].consignar(cantidad)
+            else:
+                print("Número de cuenta no encontrado.")
+        
+        elif opcion == '3':
+            numero_cta = input("Ingrese el número de cuenta: ")
+            if numero_cta in cuentas:
+                cantidad = float(input("Ingrese la cantidad a retirar: "))
+                cuentas[numero_cta].retirar(cantidad)
+            else:
+                print("Número de cuenta no encontrado.")
+        
+        elif opcion == '4':
+            numero_cta_origen = input("Ingrese el número de cuenta origen: ")
+            numero_cta_destino = input("Ingrese el número de cuenta destino: ")
+            if numero_cta_origen in cuentas and numero_cta_destino in cuentas:
+                cantidad = float(input("Ingrese la cantidad a transferir: "))
+                cuentas[numero_cta_origen].transferir(cantidad, cuentas[numero_cta_destino])
+            else:
+                print("Número de cuenta no encontrado.")
+        
+        elif opcion == '5':
+            numero_cta = input("Ingrese el número de cuenta: ")
+            if numero_cta in cuentas:
+                cuentas[numero_cta].mostrar_info()
+            else:
+                print("Número de cuenta no encontrado.")
+        
+        elif opcion == '6':
+            print("Saliendo del programa.")
+            break
+        
+        else:
+            print("Opción no válida. Por favor, seleccione una opción entre 1 y 6.")
+
+if __name__ == "__main__":
+    menu()
