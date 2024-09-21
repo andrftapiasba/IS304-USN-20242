@@ -136,24 +136,6 @@ public class Sudoku {
                 }
             }
         }
-
-        // Cargar movimientos guardados
-        public void cargarMovimientos(String nombreArchivo) throws IOException {
-            try (BufferedReader reader = new BufferedReader(new FileReader(nombreArchivo))) {
-                String line;
-                movimientosGuardados = 0; // Reiniciar contador de movimientos
-                while ((line = reader.readLine()) != null) {
-                    String[] valores = line.split(",");
-                    for (int j = 0; j < 9; j++) {
-                        if (valores[j].trim().length() > 0) {
-                            int valor = Integer.parseInt(valores[j]);
-                            celdas[movimientosGuardados][j].setValor(valor);
-                        }
-                    }
-                    movimientosGuardados++;
-                }
-            }
-        }
     }
 
     private Tablero tablero;
@@ -299,34 +281,33 @@ public class Sudoku {
     private void cargarPartidaGuardada() {
         try {
             tablero.cargarEstado(ARCHIVO_GUARDADO);
+            System.out.println("Partida cargada exitosamente.");
             mostrarTablero();
-            reproducirMovimientos();
+            continuarPartida();
         } catch (IOException e) {
             System.out.println("No se pudo cargar la partida guardada.");
         }
     }
 
-    private void reproducirMovimientos() {
-        Scanner scanner = new Scanner(System.in);
-        for (int i = 0; i < 9; i++) { // Asumiendo que hay 9 movimientos guardados
-            for (int j = 0; j < 9; j++) {
-                Celda celda = tablero.getCelda(i, j);
-                if (celda.getValor() != 0) {
-                    System.out.println("Movimiento " + (i + 1) + ": Colocar " + celda.getValor() + " en posición (" + (i + 1) + ", " + (j + 1) + ")");
-                    mostrarTablero();
-                    System.out.print("¿Deseas omitir el resto de los movimientos? (S/N): ");
-                    String respuesta = scanner.nextLine().trim().toUpperCase();
-                    if (respuesta.equals("S")) {
-                        return; // Salir si el usuario elige omitir
-                    }
-                }
-            }
+    private void continuarPartida() {
+        System.out.println("Puedes continuar la partida a continuación.");
+        leerYAgregarValores();
+    }
+
+    private void evaluarExperiencia() {
+        System.out.print("Por favor, califica tu experiencia (1-5): ");
+        int calificacion = scanner.nextInt();
+        while (calificacion < 1 || calificacion > 5) {
+            System.out.print("Calificación inválida. Introduce un número entre 1 y 5: ");
+            calificacion = scanner.nextInt();
         }
+        System.out.println("Gracias por tu calificación de " + calificacion + "!");
     }
 
     public static void main(String[] args) {
         Sudoku sudoku = new Sudoku();
         sudoku.iniciarJuego();
         System.out.println("Gracias por jugar.");
+        sudoku.evaluarExperiencia();
     }
 }
