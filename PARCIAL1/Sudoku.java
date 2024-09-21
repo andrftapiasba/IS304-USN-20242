@@ -76,32 +76,66 @@ public class Sudoku {
             }
         }
 
-        private boolean esValorValido(int fila, int columna, int valor) {
+        public boolean esValorValido(int fila, int columna, int valor) {
             // Verificar fila
             for (int i = 0; i < 9; i++) {
-                if (getCelda(fila, i).getValor() == valor) {
+                if (celdas[fila][i].getValor() == valor) {
                     return false;
                 }
             }
 
             // Verificar columna
             for (int i = 0; i < 9; i++) {
-                if (getCelda(i, columna).getValor() == valor) {
+                if (celdas[i][columna].getValor() == valor) {
                     return false;
                 }
             }
 
-            // Verificar subcuadro 3x3
+            // Verificar subcuadro 3x3 
             int inicioFila = (fila / 3) * 3;
             int inicioColumna = (columna / 3) * 3;
             for (int i = inicioFila; i < inicioFila + 3; i++) {
                 for (int j = inicioColumna; j < inicioColumna + 3; j++) {
-                    if (getCelda(i, j).getValor() == valor) {
+                    if (celdas[i][j].getValor() == valor) {
                         return false;
                     }
                 }
             }
 
+            return true;
+        }
+
+        // Método para verificar si una fila está completa
+        public boolean filaCompleta(int fila) {
+            for (int i = 0; i < 9; i++) {
+                if (celdas[fila][i].getValor() == 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Método para verificar si una columna está completa
+        public boolean columnaCompleta(int columna) {
+            for (int i = 0; i < 9; i++) {
+                if (celdas[i][columna].getValor() == 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Método para verificar si un subcuadro 3x3 está completo
+        public boolean subCuadroCompleto(int fila, int columna) {
+            int inicioFila = (fila / 3) * 3;
+            int inicioColumna = (columna / 3) * 3;
+            for (int i = inicioFila; i < inicioFila + 3; i++) {
+                for (int j = inicioColumna; j < inicioColumna + 3; j++) {
+                    if (celdas[i][j].getValor() == 0) {
+                        return false;
+                    }
+                }
+            }
             return true;
         }
     }
@@ -133,6 +167,23 @@ public class Sudoku {
 
         if (esValorValido(fila, columna, valor)) {
             tablero.getCelda(fila, columna).setValor(valor);
+
+            // Verificar si se ha completado una fila, columna o subcuadro
+            if (tablero.filaCompleta(fila)) {
+                System.out.println("¡Has completado la fila " + (fila + 1) + "!");
+            }
+
+            if (tablero.columnaCompleta(columna)) {
+                System.out.println("¡Has completado la columna " + (columna + 1) + "!");
+            }
+
+            if (tablero.subCuadroCompleto(fila, columna)) {
+                int inicioFila = (fila / 3) * 3 + 1;
+                int inicioColumna = (columna / 3) * 3 + 1;
+                System.out.println("¡Has completado el subcuadro 3x3 que comienza en la fila " 
+                                   + inicioFila + ", columna " + inicioColumna + "!");
+            }
+
             return true;
         } else {
             System.out.println("Valor no válido.");
@@ -141,32 +192,7 @@ public class Sudoku {
     }
 
     private boolean esValorValido(int fila, int columna, int valor) {
-        // Verificar fila
-        for (int i = 0; i < 9; i++) {
-            if (tablero.getCelda(fila, i).getValor() == valor) {
-                return false;
-            }
-        }
-        
-        // Verificar columna
-        for (int i = 0; i < 9; i++) {
-            if (tablero.getCelda(i, columna).getValor() == valor) {
-                return false;
-            }
-        }
-
-        // Verificar subcuadro 3x3
-        int inicioFila = (fila / 3) * 3;
-        int inicioColumna = (columna / 3) * 3;
-        for (int i = inicioFila; i < inicioFila + 3; i++) {
-            for (int j = inicioColumna; j < inicioColumna + 3; j++) {
-                if (tablero.getCelda(i, j).getValor() == valor) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return tablero.esValorValido(fila, columna, valor);
     }
 
     public void mostrarTablero() {
@@ -177,17 +203,30 @@ public class Sudoku {
         while (true) {
             try {
                 System.out.println("Introduce fila (1-9) o -1 para terminar:");
-                int fila = scanner.nextInt() - 1; // Ajuste para índice basado en 0
-                if (fila == -2) break;
+                int fila = scanner.nextInt(); // Capturar fila
+
+                if (fila == -1) break; // Terminar el ciclo si se ingresa -1
+
+                if (fila < 1 || fila > 9) {
+                    System.out.println("Fila fuera de rango. Debe estar entre 1 y 9.");
+                    scanner.nextLine(); // Limpiar el buffer
+                    continue;
+                }
 
                 System.out.println("Introduce columna (1-9):");
-                int columna = scanner.nextInt() - 1; // Ajuste para índice basado en 0
+                int columna = scanner.nextInt();
+
+                if (columna < 1 || columna > 9) {
+                    System.out.println("Columna fuera de rango. Debe estar entre 1 y 9.");
+                    scanner.nextLine(); // Limpiar el buffer
+                    continue;
+                }
 
                 System.out.println("Introduce valor (1-9):");
                 int valor = scanner.nextInt();
-                scanner.nextLine(); // Limpiar el buffer después de nextInt()
+                scanner.nextLine(); // Limpiar el buffer
 
-                if (agregarValor(fila, columna, valor)) {
+                if (agregarValor(fila - 1, columna - 1, valor)) {
                     System.out.println("Valor agregado correctamente.");
                 } else {
                     System.out.println("No se pudo agregar el valor.");
@@ -209,22 +248,30 @@ public class Sudoku {
     }
 
     private void iniciarJuego() {
-        mostrarMenu();
-        int opcion = scanner.nextInt();
-        scanner.nextLine(); // Limpiar el buffer
+        while (true) {
+            mostrarMenu();
+            try {
+                int opcion = scanner.nextInt();
+                scanner.nextLine(); // Limpiar el buffer
 
-        switch (opcion) {
-            case 1:
-                System.out.println("Iniciando con el tablero vacío...");
-                break;
-            case 2:
-                int cantidad = elegirCantidadNumeros();
-                System.out.println("Iniciando con " + cantidad + " números aleatorios...");
-                tablero.inicializarConNumerosAleatorios(cantidad);
-                break;
-            default:
-                System.out.println("Opción no válida. Iniciando con el tablero vacío...");
-                break;
+                switch (opcion) {
+                    case 1:
+                        System.out.println("Iniciando con el tablero vacío...");
+                        break;
+                    case 2:
+                        int cantidad = elegirCantidadNumeros();
+                        System.out.println("Iniciando con " + cantidad + " números aleatorios...");
+                        tablero.inicializarConNumerosAleatorios(cantidad);
+                        break;
+                    default:
+                        System.out.println("Opción no válida. Intenta de nuevo.");
+                        continue;
+                }
+                break; // Salir del ciclo si la opción es válida
+            } catch (InputMismatchException e) {
+                System.out.println("Entrada inválida. Debes ingresar 1 o 2.");
+                scanner.next(); // Limpiar el buffer
+            }
         }
         mostrarTablero();
         leerYAgregarValores();
