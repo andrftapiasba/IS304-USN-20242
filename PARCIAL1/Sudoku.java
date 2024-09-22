@@ -153,15 +153,16 @@ public class Sudoku {
         }
 
         Celda celda = tablero.getCelda(fila, columna);
-        if (celda.getValor() != 0) {
-            System.out.println("La celda ya tiene el valor " + celda.getValor() + ". ¿Desea sobrescribirlo? (S/N)");
-            String respuesta = scanner.nextLine().trim().toUpperCase();
-            if (!respuesta.equals("S")) {
-                System.out.println("Valor no modificado.");
-                return false;
-            }
+
+        // Siempre preguntar antes de sobrescribir cualquier valor, incluso si la celda está vacía
+        System.out.println("La celda actual tiene el valor " + celda.getValor() + ". ¿Desea sobrescribirlo? (S/N)");
+        String respuesta = scanner.nextLine().trim().toUpperCase();
+        if (!respuesta.equals("S")) {
+            System.out.println("Valor no modificado.");
+            return false;
         }
 
+        // Verificar si el valor es válido antes de modificar la celda
         if (tablero.esValorValido(fila, columna, valor)) {
             tablero.getCelda(fila, columna).setValor(valor);
             try {
@@ -203,6 +204,7 @@ public class Sudoku {
 
                 System.out.print("Introduce valor (1-9): ");
                 int valor = scanner.nextInt();
+                scanner.nextLine(); // Limpiar el buffer
 
                 if (agregarValor(fila - 1, columna - 1, valor)) {
                     System.out.println("Valor agregado correctamente.");
@@ -260,54 +262,37 @@ public class Sudoku {
     }
 
     private int elegirCantidadNumeros() {
-        int cantidad = 0;
-        while (cantidad < 9 || cantidad > 21) {
+        while (true) {
             try {
-                System.out.print("Introduce la cantidad de números aleatorios (entre 9 y 21): ");
-                cantidad = scanner.nextInt();
+                System.out.print("Introduce la cantidad de números aleatorios para colocar en el tablero (1-81): ");
+                int cantidad = scanner.nextInt();
                 scanner.nextLine(); // Limpiar el buffer
-
-                if (cantidad < 9 || cantidad > 21) {
-                    System.out.println("Cantidad no válida. Debe estar entre 9 y 21.");
+                if (cantidad < 1 || cantidad > 81) {
+                    System.out.println("Cantidad fuera de rango. Debe estar entre 1 y 81.");
+                    continue;
                 }
+                return cantidad;
             } catch (InputMismatchException e) {
-                System.out.println("Entrada inválida. Por favor, introduce un número entero.");
+                System.out.println("Entrada inválida. Debes ingresar un número entero.");
                 scanner.next(); // Limpiar el buffer
             }
         }
-        return cantidad;
     }
 
     private void cargarPartidaGuardada() {
         try {
             tablero.cargarEstado(ARCHIVO_GUARDADO);
-            System.out.println("Partida cargada exitosamente.");
-            mostrarTablero();
-            continuarPartida();
+            System.out.println("Partida cargada correctamente.");
         } catch (IOException e) {
-            System.out.println("No se pudo cargar la partida guardada.");
+            System.out.println("Error al cargar la partida guardada. Se iniciará con el tablero vacío.");
         }
-    }
-
-    private void continuarPartida() {
-        System.out.println("Puedes continuar la partida a continuación.");
+        mostrarTablero();
         leerYAgregarValores();
-    }
-
-    private void evaluarExperiencia() {
-        System.out.print("Por favor, califica tu experiencia (1-5): ");
-        int calificacion = scanner.nextInt();
-        while (calificacion < 1 || calificacion > 5) {
-            System.out.print("Calificación inválida. Introduce un número entre 1 y 5: ");
-            calificacion = scanner.nextInt();
-        }
-        System.out.println("Gracias por tu calificación de " + calificacion + "!");
     }
 
     public static void main(String[] args) {
         Sudoku sudoku = new Sudoku();
         sudoku.iniciarJuego();
-        System.out.println("Gracias por jugar.");
-        sudoku.evaluarExperiencia();
     }
 }
+
