@@ -32,7 +32,6 @@ public class Sudoku {
     // Clase para representar el tablero de Sudoku
     public static class Tablero {
         private Celda[][] celdas;
-        private int movimientosGuardados; // Contador de movimientos guardados
 
         public Tablero() {
             celdas = new Celda[9][9];
@@ -41,7 +40,6 @@ public class Sudoku {
                     celdas[i][j] = new Celda();
                 }
             }
-            movimientosGuardados = 0; // Inicializar el contador
         }
 
         public Celda getCelda(int fila, int columna) {
@@ -62,21 +60,6 @@ public class Sudoku {
                 System.out.println();
                 if ((i + 1) % 3 == 0 && i != 8) {
                     System.out.println("  -----------------------");
-                }
-            }
-        }
-
-        public void inicializarConNumerosAleatorios(int cantidad) {
-            Random rand = new Random();
-            int count = 0;
-            while (count < cantidad) {
-                int fila = rand.nextInt(9);
-                int columna = rand.nextInt(9);
-                int valor = rand.nextInt(9) + 1; // Números entre 1 y 9
-
-                if (getCelda(fila, columna).getValor() == 0 && esValorValido(fila, columna, valor)) {
-                    getCelda(fila, columna).setValor(valor);
-                    count++;
                 }
             }
         }
@@ -108,6 +91,24 @@ public class Sudoku {
             }
 
             return true;
+        }
+
+        // Método para inicializar el tablero con una cantidad aleatoria de números
+        public void inicializarConNumerosAleatorios(int cantidad) {
+            Random random = new Random();
+            int numerosAgregados = 0;
+
+            while (numerosAgregados < cantidad) {
+                int fila = random.nextInt(9);
+                int columna = random.nextInt(9);
+                int valor = random.nextInt(9) + 1; // Generar número entre 1 y 9
+
+                // Solo agregar si la celda está vacía y el valor es válido
+                if (celdas[fila][columna].getValor() == 0 && esValorValido(fila, columna, valor)) {
+                    celdas[fila][columna].setValor(valor);
+                    numerosAgregados++;
+                }
+            }
         }
 
         // Guardar el estado del tablero en un archivo
@@ -153,16 +154,15 @@ public class Sudoku {
         }
 
         Celda celda = tablero.getCelda(fila, columna);
-
-        // Siempre preguntar antes de sobrescribir cualquier valor, incluso si la celda está vacía
-        System.out.println("La celda actual tiene el valor " + celda.getValor() + ". ¿Desea sobrescribirlo? (S/N)");
-        String respuesta = scanner.nextLine().trim().toUpperCase();
-        if (!respuesta.equals("S")) {
-            System.out.println("Valor no modificado.");
-            return false;
+        if (celda.getValor() != 0) {
+            System.out.println("La celda ya tiene el valor " + celda.getValor() + ". ¿Desea sobrescribirlo? (S/N)");
+            String respuesta = scanner.nextLine().trim().toUpperCase();
+            if (!respuesta.equals("S")) {
+                System.out.println("Valor no modificado.");
+                return false;
+            }
         }
 
-        // Verificar si el valor es válido antes de modificar la celda
         if (tablero.esValorValido(fila, columna, valor)) {
             tablero.getCelda(fila, columna).setValor(valor);
             try {
@@ -204,7 +204,8 @@ public class Sudoku {
 
                 System.out.print("Introduce valor (1-9): ");
                 int valor = scanner.nextInt();
-                scanner.nextLine(); // Limpiar el buffer
+
+                scanner.nextLine(); // Limpiar el buffer después de leer el entero
 
                 if (agregarValor(fila - 1, columna - 1, valor)) {
                     System.out.println("Valor agregado correctamente.");
@@ -262,37 +263,43 @@ public class Sudoku {
     }
 
     private int elegirCantidadNumeros() {
-        while (true) {
+        int cantidad = 0;
+        while (cantidad < 9 || cantidad > 21) {
             try {
-                System.out.print("Introduce la cantidad de números aleatorios para colocar en el tablero (1-81): ");
-                int cantidad = scanner.nextInt();
+                System.out.print("Introduce la cantidad de números aleatorios (entre 9 y 21): ");
+                cantidad = scanner.nextInt();
                 scanner.nextLine(); // Limpiar el buffer
-                if (cantidad < 1 || cantidad > 81) {
-                    System.out.println("Cantidad fuera de rango. Debe estar entre 1 y 81.");
-                    continue;
+
+                if (cantidad < 9 || cantidad > 21) {
+                    System.out.println("Cantidad no válida. Debe estar entre 9 y 21.");
                 }
-                return cantidad;
             } catch (InputMismatchException e) {
-                System.out.println("Entrada inválida. Debes ingresar un número entero.");
+                System.out.println("Entrada inválida. Por favor, introduce un número entero.");
                 scanner.next(); // Limpiar el buffer
             }
         }
+        return cantidad;
     }
 
     private void cargarPartidaGuardada() {
         try {
             tablero.cargarEstado(ARCHIVO_GUARDADO);
-            System.out.println("Partida cargada correctamente.");
+            System.out.println("Partida cargada exitosamente.");
+            mostrarTablero();
+            continuarPartida();
         } catch (IOException e) {
-            System.out.println("Error al cargar la partida guardada. Se iniciará con el tablero vacío.");
+            System.out.println("No se pudo cargar la partida guardada.");
         }
-        mostrarTablero();
+    }
+
+    private void continuarPartida() {
+        System.out.println("Puedes continuar la partida a continuación.");
         leerYAgregarValores();
     }
 
     public static void main(String[] args) {
         Sudoku sudoku = new Sudoku();
         sudoku.iniciarJuego();
+        System.out.println("Gracias por jugar.");
     }
 }
-
